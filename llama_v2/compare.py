@@ -98,7 +98,3 @@ def main():
 if __name__ == "__main__":
     main()
     
-#path1= "./generatedOutput/output.txt"
-#path2 = "./goldenOutput/output.txt"
-
-#compare_output(path1, path2)
