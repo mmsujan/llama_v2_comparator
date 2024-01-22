@@ -7,7 +7,7 @@
 Run following command to create conda environment
  
 ```
-conda create -n llama_v2
+conda create -n llama_v2 -y
 conda activate llama_v2
 pip install -e .
 cd llama_v2
