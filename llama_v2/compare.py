@@ -11,6 +11,29 @@ SUCCESS = 0
 ERROR = 1
 UNKNOWN_FAILURE = 2
 
+#Levenshtein gives minimum distance to make two string same using Insertion, Deletion and Substitution operations
+#The algorithm can work in Character or word level
+#Comparision is not case sensitive
+
+def levenshtien_distance(source, target):
+    len_s = len(source)
+    len_t = len(target)
+    
+    #create matrix to store the distances between substring
+    matrix = [[0]*(len_t+1) for _ in range(len_s+1)]
+    
+    for i in range(len_s+1):
+        matrix[i][0] = i
+    for j in range(len_t+1):
+        matrix[0][j] = j
+        
+    for i in range(1, len_s+1):
+        for j in range(1, len_t+1):
+            substitutionCost  = 0 if source[i-1].lower() == target[j-1].lower() else 1
+            matrix[i][j] = min(matrix[i-1][j] + 1, #Deletion
+                matrix[i][j-1] + 1, #insertion
+                matrix[i-1][j-1] + substitutionCost ) #substitution
+    return matrix[len_s][len_t]
 
 def compare(threshold, compare_mode, platform, verbosity):
     
@@ -42,10 +65,15 @@ def compare(threshold, compare_mode, platform, verbosity):
     mismatch_count = 0
     err_code = SUCCESS
     
-    if (compare_mode == "Word" or compare_mode == "Character") and len(content1) != len(content2):
-        if verbosity:
-            print("Files have different length.")
-        err_code = ERROR
+    
+    if (compare_mode == "Word" or compare_mode == "Character"):
+        
+        
+        distance = levenshtien_distance(content1, content2)
+        if distance > threshold:
+            err_code = ERROR
+            if verbosity:
+                print("Mismatch count between golden and generated output is more than threshold: mismatch count = ", distance, " threshold = ", threshold)
         return err_code
         
     for i, (item1, item2) in enumerate(zip(content1, content2)):
@@ -79,7 +107,7 @@ def run_comparator(threshold, compare_mode, platform, verbosity):
     
 def add_text_compare_params(parser):
     parser.add_argument("--threshold", default= 10, type=int, help="Maximum number of difference between generated and golden text.")
-    parser.add_argument("--compare_mode", default="Line", type=str, help="Compare mode : Character, Word or Line")
+    parser.add_argument("--compare_mode", default="Word", type=str, help="Compare mode : Character, Word or Line")
     parser.add_argument("--platform", default="DG2", type=str, help="Platform: DG2 or MTLH")
     parser.add_argument("--verbosity", action="store_true", help="Print error details")
 ## main function for other script    
@@ -96,5 +124,5 @@ def main():
     return run_comparator(args.threshold, args.compare_mode, args.platform, args.verbosity)
     
 if __name__ == "__main__":
-    main()
+   main()
     
