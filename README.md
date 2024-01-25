@@ -20,7 +20,7 @@ cd llama_v2
 pip install -r requirements.txt
 ```
 ## Run Test
- - Copy Llama_V2 models from [Llama_v2_modesl]() 
+ - Collect Llama_V2 models from [Llama_v2_modesl]() 
  - Unzip " models" directory and put it inside "llama_v2_comparator/llama_v2"
  - From conda or command prompt, cd path to "llama_v2_comparator/llama_v2" directory  
  

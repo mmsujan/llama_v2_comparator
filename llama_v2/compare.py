@@ -53,6 +53,7 @@ def compare(threshold, compare_mode, platform, verbosity):
             content1 = file1.read()
         else:
             content1 = file1.readlines()
+            #content1 = file1.read().split()
     with open(file2_path, 'r') as file2:
         content2 = None 
         if compare_mode == "Word":
@@ -61,6 +62,7 @@ def compare(threshold, compare_mode, platform, verbosity):
             content2 = file2.read()
         else:
             content2 = file2.readlines()
+            #content2 = file2.read().split()
     
     mismatch_count = 0
     err_code = SUCCESS
@@ -75,12 +77,22 @@ def compare(threshold, compare_mode, platform, verbosity):
             if verbosity:
                 print("Mismatch count between golden and generated output is more than threshold: mismatch count = ", distance, " threshold = ", threshold)
         return err_code
-        
-    for i, (item1, item2) in enumerate(zip(content1, content2)):
-        if item1 != item2:
-            mismatch_count += 1
-            if verbosity:
-                print ( item1, " != ", item2)
+    
+    
+    non_empty_lines_1 = [line for line in content1 if line.strip()]
+    non_empty_lines_2 = [line for line in content2 if line.strip()]
+    #Todo need add logic when golden and generated outputs are not same
+    for i, (item1, item2) in enumerate(zip(non_empty_lines_1, non_empty_lines_2)):
+        item1_words = item1.split()
+        item2_words = item2.split()
+        for j, (w1, w2) in enumerate(zip(item1_words, item2_words)):
+            if w1 != w2:
+                mismatch_count += 1
+                if verbosity:
+                    print ( w1, " != ", w2)
+        # when 2 lines are not equal
+        mismatch_count = mismatch_count + abs(len(item2_words) - len(item1_words))
+
     if mismatch_count > threshold:
         err_code = ERROR
         if verbosity:
@@ -106,8 +118,8 @@ def run_comparator(threshold, compare_mode, platform, verbosity):
     return ret_code
     
 def add_text_compare_params(parser):
-    parser.add_argument("--threshold", default= 10, type=int, help="Maximum number of difference between generated and golden text.")
-    parser.add_argument("--compare_mode", default="Word", type=str, help="Compare mode : Character, Word or Line")
+    parser.add_argument("--threshold", default= 5, type=int, help="Maximum number of difference between generated and golden text.")
+    parser.add_argument("--compare_mode", default="Line", type=str, help="Compare mode : Character, Word or Line")
     parser.add_argument("--platform", default="DG2", type=str, help="Platform: DG2 or MTLH")
     parser.add_argument("--verbosity", action="store_true", help="Print error details")
 ## main function for other script    
@@ -125,4 +137,3 @@ def main():
     
 if __name__ == "__main__":
    main()
-    
